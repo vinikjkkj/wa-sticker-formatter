@@ -1,6 +1,5 @@
-import { existsSync, readFile, writeFile } from 'fs-extra'
+import { readFile, writeFile, access } from 'fs-extra'
 import { IStickerConfig, IStickerOptions } from './Types'
-import axios from 'axios'
 import Utils, { defaultBg } from './Utils'
 import { fromBuffer } from 'file-type'
 import convert from './internal/convert'
@@ -8,6 +7,7 @@ import Exif from './internal/Metadata/Exif'
 import { StickerTypes } from './internal/Metadata/StickerTypes'
 import { Categories, extractMetadata } from '.'
 import { Color } from 'sharp'
+import { constants } from 'fs';
 
 /**
  * Sticker class
@@ -29,15 +29,29 @@ export class Sticker {
         this.metadata.background = this.metadata.background ?? defaultBg
     }
 
-    private _parse = async (): Promise<Buffer> =>
-        Buffer.isBuffer(this.data)
-            ? this.data
-            : this.data.trim().startsWith('<svg')
-            ? Buffer.from(this.data)
-            : (async () =>
-                  existsSync(this.data)
-                      ? readFile(this.data)
-                      : axios.get(this.data as string, { responseType: 'arraybuffer' }).then(({ data }) => data))()
+    private _parse = async (): Promise<Buffer> => {
+        if (Buffer.isBuffer(this.data)) {
+            return this.data;
+        }
+
+        if (typeof this.data === 'string' && this.data.trim().startsWith('<svg')) {
+            return Buffer.from(this.data);
+        }
+
+        if (typeof this.data === 'string') {
+            try {
+                await access(this.data, constants.F_OK);
+                return await readFile(this.data);
+            } catch {
+                const res = await globalThis.fetch(this.data);
+                if (!res.ok) throw new Error(`Failed to fetch: ${res.status} ${res.statusText}`);
+                const arrayBuffer = await res.arrayBuffer();
+                return Buffer.from(arrayBuffer);
+            }
+        }
+
+        throw new Error('Invalid data type for _parse');
+    }
 
     private _getMimeType = async (data: Buffer): Promise<string> => {
         const type = await fromBuffer(data)
