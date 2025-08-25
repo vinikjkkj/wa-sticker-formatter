@@ -36,7 +36,6 @@
   "issues": "https://github.com/AlenVelocity/wa-sticker-formatter/issues",
   "devDependencies": {
     "@types/fluent-ffmpeg": "^2.1.18",
-    "@types/fs-extra": "^9.0.13",
     "@types/mocha": "^9.0.0",
     "@types/node": "^22.18.0",
     "@types/sharp": "^0.28.5",

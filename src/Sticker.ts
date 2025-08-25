@@ -1,4 +1,4 @@
-import { readFile, writeFile, access } from 'fs-extra'
+import { readFile, writeFile, access } from 'fs/promises'
 import { IStickerConfig, IStickerOptions } from './Types'
 import Utils, { defaultBg } from './Utils'
 import { fromBuffer } from 'file-type'

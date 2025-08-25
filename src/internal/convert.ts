@@ -1,6 +1,6 @@
 import sharp, { fit } from 'sharp'
 import videoToGif from './videoToGif'
-import { writeFile } from 'fs-extra'
+import { writeFile } from 'fs/promises'
 import { tmpdir } from 'os'
 import crop from './crop'
 import { StickerTypes } from './Metadata/StickerTypes'
